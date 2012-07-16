@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 
 absPath () {
-    echo `perl -MCwd=realpath -e "print realpath '$1'"`
+    myPath=$1
+    
+    fileType=`stat -f "%HT" "$1"`
+    if [[ "$fileType" == "Symbolic Link" ]]; then
+        myPath=`readlink "$1"`
+    fi
+    
+    echo `perl -MCwd=realpath -e "print realpath '$myPath'"`
 }
 
 SOURCE_DIR=`absPath "$1"`
@@ -17,7 +24,6 @@ for arg in "$@"; do
     ARG_PATH=`absPath "$arg"`
     
     fileList[$i-1]=$ARG_PATH
-    fileList[$i-1]=$ARG_PATH
     
     # echo "Arg $i: $arg --> $ARG_PATH"
     
@@ -30,8 +36,8 @@ done
 # 
 # echo
 
-# echo "rsync -aP --link-dest=\"$LINK_DIR\" \"${fileList[@]}\"" # > ~/hlLog
+# echo "rsync -aLP --link-dest=\"$LINK_DIR\" \"${fileList[@]}\"" # > ~/hlLog
 
 # echo >> ~/hlLog
 
-rsync -aP --link-dest="$LINK_DIR" "${fileList[@]}" # >> ~/hlLog
+rsync -aLP --link-dest="$LINK_DIR" "${fileList[@]}" # >> ~/hlLog
